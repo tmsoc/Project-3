@@ -114,7 +114,7 @@ def create_export_file(in_file: Path, views_list: list) -> Path:
 def import_file(import_file: Path) -> list:
     """
     Imports the .csv path to the imported 
-    movies list
+    shows list
 
     Rewritten to import with a csv.DictReader
     and to store the file to a global list
@@ -149,6 +149,11 @@ def import_file(import_file: Path) -> list:
 #     print(f"{least_viewed[0]} had {less_views} million less views than average")
 
 # --------------------END OF ORIGINAL CODE------------------------
+
+
+# --------------------WIGET FUNCTIONS------------------------
+def ___WIGET___():
+    pass
 
 
 def enable_button(button: Button) -> None:
@@ -191,15 +196,64 @@ def set_output_read_only() -> None:
     output_text["state"] = "disabled"
 
 
+# --------------------TEXT BOX / ENTRY FUNCTIONS------------------------
+
+
+def ___TEXT_BOX___():
+    pass
+
+
 def print_welcome_message() -> None:
     """
     Prints the welcome message to the
-    ouput text box.
+    output text box.
     """
     set_output_write_enable()
     message = 'Press "Begin" to enter a .csv file to upload\n'
     output_text.insert(END, message)
     set_output_read_only()
+
+
+def append_output_text(message: str) -> None:
+    """
+    Appends the given string argument
+    to the end of the output text box.
+    """
+    set_output_write_enable()
+    output_text.insert(END, message)
+    set_output_read_only()
+
+
+def display_current_show():
+    """
+    Displays the current show to the 
+    output text box. 
+    """
+    show = imported_shows[current_show_index]
+    show_output = (
+        f"Episode: {show['Episode Name']}\n"
+        f"Season: {show['Season']}, Episode: {show['Episode Number']}\n"
+    )
+    append_output_text(show_output)
+
+
+def clear_output_text() -> None:
+    """
+    Clears the output text box
+    """
+    set_output_write_enable()
+    output_text.delete(1.0, END)
+    set_output_read_only()
+
+
+def clear_entry_field() -> None:
+    """Clears the text entry filed"""
+    entry_field.delete(0, "end")
+
+
+# --------------------UI FUNCTIONS------------------------
+def ___UI___():
+    pass
 
 
 def init_ui() -> None:
@@ -217,39 +271,10 @@ def init_ui() -> None:
     insert_button(begin_button)
 
 
-def get_import_file() -> Path:
-    """
-    Returns a Path to the selected file
-    by the user. Opens a filedialog 
-    window to the user to select a file 
-    to import.
-    """
-    return Path(filedialog.askopenfilename())
-
-
-def append_output_text(message: str) -> None:
-    """
-    Appends the given string argument
-    to the end of the ouput text box.
-    """
-    set_output_write_enable()
-    output_text.insert(END, message)
-    set_output_read_only()
-
-
-def clear_output_text() -> None:
-    """
-    Clears the output text box
-    """
-    set_output_write_enable()
-    output_text.delete(1.0, END)
-    set_output_read_only()
-
-
 def init_viewer_buttons() -> None:
     """
     Sets the button states on the
-    GUI for a movie view.
+    GUI for a shows views input.
     """
     remove_button(begin_button)
     remove_button(banana_label)
@@ -259,9 +284,19 @@ def init_viewer_buttons() -> None:
     insert_button(rename_button)
 
 
-def clear_entry_field() -> None:
-    """Clears the text entry filed"""
-    entry_field.delete(0, "end")
+# --------------------IMPORT / EXPORT FUNCTIONS------------------------
+def ___IMPORT___():
+    pass
+
+
+def get_import_file() -> Path:
+    """
+    Returns a Path to the selected file
+    by the user. Opens a filedialog 
+    window to the user to select a file 
+    to import.
+    """
+    return Path(filedialog.askopenfilename())
 
 
 def import_csv_file(import_path: Path) -> None:
@@ -276,47 +311,53 @@ def import_csv_file(import_path: Path) -> None:
     show_list_len = len(imported_shows)
 
 
-def display_current_show():
-    print(current_show_index)
-    print(imported_shows[current_show_index])
-    show = imported_shows[current_show_index]
-    show_output = (
-        f"Episode: {show['Episode Name']}\n"
-        f"Season {show['Season']}, Episode Number {show['Episode Number']}"
-    )
-    append_output_text(show_output)
+# --------------------SEQUENCE FUNCTIONS-------------------------------
+def ___SEQUENCE___():
+    pass
 
 
-# Last save spot
-def init_movie_viewer() -> None:
+def init_shows_viewer() -> None:
     """
-    
+    Clears all text fields, initializes
+    all buttons, and displays the current
+    show for views entry.
     """
     # Clears all text fields
     clear_output_text()
     clear_entry_field()
-    # Initalizes GUI buttons
-    init_viewer_buttons()
-    # displays the current show to the output text
-    display_current_show()
+
+    if show_list_len > 0:
+        # Initializes GUI buttons
+        init_viewer_buttons()
+        # displays the current show to the output text
+        display_current_show()
+    else:
+        empty_file = "Imported file has no shows saved.\n"
+        append_output_text(empty_file)
+        print_welcome_message()
+
+
+# --------------------BUTTON FUNCTIONS-------------------------------
+def ___BUTTON___():
+    pass
 
 
 def begin_user_view_entry():
     """
-    Begins the movie views sequence once
+    Begins the shows views sequence once
     the user selects a valid .csv file.
     If an invalid file is selected, user
-    is notified on the ouput text box
+    is notified on the output text box
     that the file selected was invalid.
     """
     # Gets the path of the csv file to import
     upload_file = get_import_file()
     # Verifies that the file has a .csv suffix
     if upload_file.is_file() and upload_file.suffix == ".csv":
-        # imports the movie list
+        # imports the shows list
         import_csv_file(upload_file)
-        # initializes the GUI for entering movie views
-        init_movie_viewer()
+        # initializes the GUI for entering shows viewings
+        init_shows_viewer()
     # If the file was not a valid .csv file,
     # notify the user.
     elif upload_file.is_file():
@@ -337,7 +378,7 @@ def submit_new_name():
     banana_label.grid()
 
 
-def next_movie():
+def next_show():
     # Test Code
     rename_button["state"] = "normal"
     banana_label.grid_remove()
@@ -347,7 +388,7 @@ def exit_list():
     pass
 
 
-def rename_movie():
+def rename_show():
     """
 
     """
@@ -381,8 +422,8 @@ output_text = Text(
 begin_button = ttk.Button(content, text="Begin", command=begin_user_view_entry)
 enter_button = ttk.Button(content, text="Enter1", command=submit_text_entry)
 submit_name_button = ttk.Button(content, text="Enter2", command=submit_new_name)
-rename_button = ttk.Button(content, text="Rename", command=rename_movie)
-next_button = ttk.Button(content, text="Next", command=next_movie)
+rename_button = ttk.Button(content, text="Rename", command=rename_show)
+next_button = ttk.Button(content, text="Next", command=next_show)
 exit_button = ttk.Button(content, text="Exit List", command=exit_list)
 # Photos
 banana = PhotoImage(file="bananadance.gif")
