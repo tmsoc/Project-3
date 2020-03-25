@@ -135,8 +135,63 @@ def import_file(import_file: Path) -> list:
 # --------------------END OF ORIGINAL CODE------------------------
 
 
+# Main Window
+root = Tk()
+root.title("Lively Earth Studios")
+root.iconbitmap("PyCrust.ico")
+# Grid Layout
+content = ttk.Frame(root, padding=(10, 10, 10, 10))
+text_frame = Frame(content, relief="groove")
+text_scrollbar = Scrollbar(text_frame)
+entry_label = ttk.Label(content, text="Views")
+entry_field = ttk.Entry(content)
+output_text = Text(
+    text_frame,
+    yscrollcommand=text_scrollbar.set,
+    width=35,
+    height=8,
+    font=("Helvetica", 12),
+    wrap=(WORD),
+    state="disabled",
+)
+# Buttons
+begin_button = ttk.Button(content, text="Begin")
+enter_button = ttk.Button(content, text="Enter1")
+submit_name_button = ttk.Button(content, text="Enter2")
+rename_button = ttk.Button(content, text="Rename")
+next_button = ttk.Button(content, text="Next")
+exit_button = ttk.Button(content, text="Exit List")
+# Photos
+banana = PhotoImage(file="bananadance.gif")
+small_banana = banana.subsample(2)
+banana_label = Label(content, image=small_banana)
+# Wiget Placement
+content.grid(column=0, row=0, sticky=(N, S, E, W))
+text_frame.grid(column=0, row=0, columnspan=3, rowspan=5, sticky=(N, S, E, W))
+text_scrollbar.grid(row=0, column=1, sticky=(N, S, E))
+text_scrollbar.config(command=output_text.yview)
+output_text.grid(row=0, column=0, sticky=(N, S, W, E))
+entry_label.grid(column=3, row=0, columnspan=2, sticky=(N, W), padx=5)
+entry_field.grid(column=3, row=1, columnspan=2, sticky=(N, E, W), padx=5)
+begin_button.grid(column=3, row=2, padx=5, pady=3, sticky=(N))
+enter_button.grid(column=3, row=2, padx=5, pady=3)
+rename_button.grid(column=4, row=2, padx=5)
+next_button.grid(column=3, row=3, padx=5, pady=6)
+exit_button.grid(column=3, row=4, padx=5, pady=3)
+banana_label.grid(column=4, row=3, rowspan=3)
+# GUI Formatting
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
+content.columnconfigure(0, weight=1)
+content.columnconfigure(1, weight=1)
+content.columnconfigure(2, weight=1)
+content.columnconfigure(3, weight=1)
+content.columnconfigure(4, weight=1)
+content.rowconfigure(1, weight=1)
+
+
 def main():
-    pass
+    root.mainloop()
 
 
 if __name__ == "__main__":
