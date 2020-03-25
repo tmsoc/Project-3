@@ -4,6 +4,12 @@ from tkinter import filedialog
 from tkinter import ttk
 import csv
 
+
+# Global Variables
+imported_shows = list()
+current_show_index = 0
+show_list_len = int()
+
 # --------------------ORIGINAL CODE------------------------
 
 # def get_user_path() -> Path:
@@ -106,12 +112,25 @@ def create_export_file(in_file: Path, views_list: list) -> Path:
 
 
 def import_file(import_file: Path) -> list:
-    show_list = list()
-    with open(import_file, "r") as in_file:
-        for line in in_file:
-            show_data = line.split(",")
-            show_list.append(show_data)
-    return show_list
+    """
+    Imports the .csv path to the imported 
+    movies list
+
+    Rewritten to import with a csv.DictReader
+    and to store the file to a global list
+    """
+    # show_list = list()
+    # with open(import_file, "r") as in_file:
+    #     for line in in_file:
+    #         show_data = line.split(",")
+    #         show_list.append(show_data)
+    # return show_list
+    csv_in = list()
+    with open(import_file, newline="") as in_file:
+        reader = csv.DictReader(in_file)
+        for line in reader:
+            csv_in.append(line)
+    return csv_in
 
 
 # def views_calculator():
@@ -123,9 +142,6 @@ def import_file(import_file: Path) -> list:
 #     least_viewed = get_least_popular(views_list)
 #     average = average_views(views_list)
 
-#     ##    print(views_list[1][-1])
-#     ##    print(type(views_list[1][-1]))
-
 #     more_views = int(most_viewed[-1]) - average
 #     less_views = average - int(least_viewed[-1])
 
@@ -133,6 +149,213 @@ def import_file(import_file: Path) -> list:
 #     print(f"{least_viewed[0]} had {less_views} million less views than average")
 
 # --------------------END OF ORIGINAL CODE------------------------
+
+
+def enable_button(button: Button) -> None:
+    """Enables a state of a button"""
+    button["state"] = "normal"
+
+
+def disable_button(button: Button) -> None:
+    """Disables the state of a button"""
+    button["state"] = "disabled"
+
+
+def remove_button(button: Button) -> None:
+    """Removes a button from the GUI"""
+    button.grid_remove()
+
+
+def insert_button(button: Button) -> None:
+    """
+    Reinserts a button to the GUI
+    Button has to be removed by button.remove()
+    and not button.forget().
+    """
+    button.grid()
+
+
+def set_output_write_enable() -> None:
+    """
+    Sets the output Text box to
+    write enable
+    """
+    output_text["state"] = "normal"
+
+
+def set_output_read_only() -> None:
+    """
+    Sets the output Text box to
+    read-only
+    """
+    output_text["state"] = "disabled"
+
+
+def print_welcome_message() -> None:
+    """
+    Prints the welcome message to the
+    ouput text box.
+    """
+    set_output_write_enable()
+    message = 'Press "Begin" to enter a .csv file to upload\n'
+    output_text.insert(END, message)
+    set_output_read_only()
+
+
+def init_ui() -> None:
+    """
+    Initializes the GUI to it's initial
+    program begin settings.
+    """
+    print_welcome_message()
+    remove_button(enter_button)
+    remove_button(rename_button)
+    remove_button(next_button)
+    remove_button(exit_button)
+    remove_button(banana_label)
+    remove_button(submit_name_button)
+    insert_button(begin_button)
+
+
+def get_import_file() -> Path:
+    """
+    Returns a Path to the selected file
+    by the user. Opens a filedialog 
+    window to the user to select a file 
+    to import.
+    """
+    return Path(filedialog.askopenfilename())
+
+
+def append_output_text(message: str) -> None:
+    """
+    Appends the given string argument
+    to the end of the ouput text box.
+    """
+    set_output_write_enable()
+    output_text.insert(END, message)
+    set_output_read_only()
+
+
+def clear_output_text() -> None:
+    """
+    Clears the output text box
+    """
+    set_output_write_enable()
+    output_text.delete(1.0, END)
+    set_output_read_only()
+
+
+def init_viewer_buttons() -> None:
+    """
+    Sets the button states on the
+    GUI for a movie view.
+    """
+    remove_button(begin_button)
+    remove_button(banana_label)
+    insert_button(enter_button)
+    insert_button(next_button)
+    insert_button(exit_button)
+    insert_button(rename_button)
+
+
+def clear_entry_field() -> None:
+    """Clears the text entry filed"""
+    entry_field.delete(0, "end")
+
+
+def import_csv_file(import_path: Path) -> None:
+    """
+    Imports the given path to imported_shows
+    list and sets the show_list_len to the
+    imported number of items imported.
+    """
+    global imported_shows
+    global show_list_len
+    imported_shows = import_file(import_path)
+    show_list_len = len(imported_shows)
+
+
+def display_current_show():
+    print(current_show_index)
+    print(imported_shows[current_show_index])
+    show = imported_shows[current_show_index]
+    show_output = (
+        f"Episode: {show['Episode Name']}\n"
+        f"Season {show['Season']}, Episode Number {show['Episode Number']}"
+    )
+    append_output_text(show_output)
+
+
+# Last save spot
+def init_movie_viewer() -> None:
+    """
+    
+    """
+    # Clears all text fields
+    clear_output_text()
+    clear_entry_field()
+    # Initalizes GUI buttons
+    init_viewer_buttons()
+    # displays the current show to the output text
+    display_current_show()
+
+
+def begin_user_view_entry():
+    """
+    Begins the movie views sequence once
+    the user selects a valid .csv file.
+    If an invalid file is selected, user
+    is notified on the ouput text box
+    that the file selected was invalid.
+    """
+    # Gets the path of the csv file to import
+    upload_file = get_import_file()
+    # Verifies that the file has a .csv suffix
+    if upload_file.is_file() and upload_file.suffix == ".csv":
+        # imports the movie list
+        import_csv_file(upload_file)
+        # initializes the GUI for entering movie views
+        init_movie_viewer()
+    # If the file was not a valid .csv file,
+    # notify the user.
+    elif upload_file.is_file():
+        message = "Invalid file type.\n"
+        append_output_text(message)
+
+
+def submit_text_entry():
+    rename_button["state"] = "disabled"  # Test Code
+
+
+def submit_new_name():
+    # Test Code
+    enable_button(next_button)
+    exit_button["state"] = "normal"
+    enter_button.grid()
+    submit_name_button.grid_remove()
+    banana_label.grid()
+
+
+def next_movie():
+    # Test Code
+    rename_button["state"] = "normal"
+    banana_label.grid_remove()
+
+
+def exit_list():
+    pass
+
+
+def rename_movie():
+    """
+
+    """
+    # Test Code
+    remove_button(enter_button)
+    insert_button(submit_name_button)
+    disable_button(next_button)
+    disable_button(exit_button)
 
 
 # Main Window
@@ -155,12 +378,12 @@ output_text = Text(
     state="disabled",
 )
 # Buttons
-begin_button = ttk.Button(content, text="Begin")
-enter_button = ttk.Button(content, text="Enter1")
-submit_name_button = ttk.Button(content, text="Enter2")
-rename_button = ttk.Button(content, text="Rename")
-next_button = ttk.Button(content, text="Next")
-exit_button = ttk.Button(content, text="Exit List")
+begin_button = ttk.Button(content, text="Begin", command=begin_user_view_entry)
+enter_button = ttk.Button(content, text="Enter1", command=submit_text_entry)
+submit_name_button = ttk.Button(content, text="Enter2", command=submit_new_name)
+rename_button = ttk.Button(content, text="Rename", command=rename_movie)
+next_button = ttk.Button(content, text="Next", command=next_movie)
+exit_button = ttk.Button(content, text="Exit List", command=exit_list)
 # Photos
 banana = PhotoImage(file="bananadance.gif")
 small_banana = banana.subsample(2)
@@ -175,6 +398,7 @@ entry_label.grid(column=3, row=0, columnspan=2, sticky=(N, W), padx=5)
 entry_field.grid(column=3, row=1, columnspan=2, sticky=(N, E, W), padx=5)
 begin_button.grid(column=3, row=2, padx=5, pady=3, sticky=(N))
 enter_button.grid(column=3, row=2, padx=5, pady=3)
+submit_name_button.grid(column=3, row=2, padx=5, pady=3)
 rename_button.grid(column=4, row=2, padx=5)
 next_button.grid(column=3, row=3, padx=5, pady=6)
 exit_button.grid(column=3, row=4, padx=5, pady=3)
@@ -191,6 +415,7 @@ content.rowconfigure(1, weight=1)
 
 
 def main():
+    init_ui()
     root.mainloop()
 
 
