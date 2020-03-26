@@ -151,8 +151,8 @@ def import_file(import_file: Path) -> list:
 # --------------------END OF ORIGINAL CODE------------------------
 
 
-# --------------------WIGET FUNCTIONS------------------------
-def ___WIGET___():
+# --------------------WIDGET FUNCTIONS------------------------
+def ___WIDGET___():
     pass
 
 
@@ -166,18 +166,18 @@ def disable_button(button: Button) -> None:
     button["state"] = "disabled"
 
 
-def remove_button(button: Button) -> None:
-    """Removes a button from the GUI"""
-    button.grid_remove()
+def remove_widget(widget: Widget) -> None:
+    """Removes a widget from the GUI"""
+    widget.grid_remove()
 
 
-def insert_button(button: Button) -> None:
+def insert_widget(widget: Widget) -> None:
     """
-    Reinserts a button to the GUI
-    Button has to be removed by button.remove()
-    and not button.forget().
+    Reinserts a widget to the GUI.
+    Widget has to be removed by widget.remove()
+    and not widget.forget().
     """
-    button.grid()
+    widget.grid()
 
 
 def set_output_write_enable() -> None:
@@ -262,13 +262,13 @@ def init_ui() -> None:
     program begin settings.
     """
     print_welcome_message()
-    remove_button(enter_button)
-    remove_button(rename_button)
-    remove_button(next_button)
-    remove_button(exit_button)
-    remove_button(banana_label)
-    remove_button(submit_name_button)
-    insert_button(begin_button)
+    remove_widget(enter_views_button)
+    remove_widget(rename_button)
+    remove_widget(next_button)
+    remove_widget(exit_button)
+    remove_widget(banana_label)
+    remove_widget(enter_name_button)
+    insert_widget(begin_button)
 
 
 def init_viewer_buttons() -> None:
@@ -276,12 +276,31 @@ def init_viewer_buttons() -> None:
     Sets the button states on the
     GUI for a shows views input.
     """
-    remove_button(begin_button)
-    remove_button(banana_label)
-    insert_button(enter_button)
-    insert_button(next_button)
-    insert_button(exit_button)
-    insert_button(rename_button)
+    remove_widget(begin_button)
+    remove_widget(banana_label)
+    insert_widget(enter_views_button)
+    insert_widget(next_button)
+    insert_widget(exit_button)
+    insert_widget(rename_button)
+
+
+def reset_viewer_buttons() -> None:
+    """
+    Resets all the UI controls to
+    enter show views
+    """
+    enable_button(next_button)
+    enable_button(exit_button)
+    enable_button(rename_button)
+    remove_widget(enter_name_button)
+    remove_widget(banana_label)
+    insert_widget(enter_views_button)
+
+
+def bananacise() -> None:
+    """bananacise"""
+    insert_widget(banana_label)
+    append_output_text('\n"BANANA"\n')
 
 
 # --------------------IMPORT / EXPORT FUNCTIONS------------------------
@@ -342,7 +361,7 @@ def ___BUTTON___():
     pass
 
 
-def begin_user_view_entry():
+def begin_button_press():
     """
     Begins the shows views sequence once
     the user selects a valid .csv file.
@@ -365,38 +384,58 @@ def begin_user_view_entry():
         append_output_text(message)
 
 
-def submit_text_entry():
-    rename_button["state"] = "disabled"  # Test Code
+def enter_views_button_press():
+    # rename_button["state"] = "disabled"  # Test Code
+    pass
 
 
-def submit_new_name():
-    # Test Code
-    enable_button(next_button)
-    exit_button["state"] = "normal"
-    enter_button.grid()
-    submit_name_button.grid_remove()
-    banana_label.grid()
+def rename_button_press():
+    """
+    Begins the sequence to replace the
+    name for the current show
+    """
+    # initializes the UI buttons and labels
+    remove_widget(enter_views_button)
+    insert_widget(enter_name_button)
+    disable_button(rename_button)
+    disable_button(next_button)
+    disable_button(exit_button)
+    entry_label["text"] = "New Name:"
 
 
-def next_show():
+def enter_name_button_press():
+    """
+    Stores the entered name to the show,
+    resets the all the UI buttons to 
+    viewer settings, and bananacise the UI.
+    """
+    # Gets the new name from the entry field
+    new_name = entry_field.get()
+    # Verifies that a new name was entered
+    if len(new_name) > 0:
+        # Resets the UI
+        reset_viewer_buttons()
+        remove_widget(enter_name_button)
+        entry_label["text"] = "Views"
+        # Stores the new name to the shows list and
+        # replaces the old name with the new name in
+        # the output text box
+        imported_shows[current_show_index]["Episode Name"] = new_name
+        init_shows_viewer()
+        # bananacise
+        bananacise()
+
+
+def next_button_press():
     # Test Code
     rename_button["state"] = "normal"
     banana_label.grid_remove()
 
 
-def exit_list():
-    pass
-
-
-def rename_show():
-    """
-
-    """
+def exit_button_press():
     # Test Code
-    remove_button(enter_button)
-    insert_button(submit_name_button)
-    disable_button(next_button)
-    disable_button(exit_button)
+    for item in imported_shows:
+        print(item)
 
 
 # Main Window
@@ -419,12 +458,14 @@ output_text = Text(
     state="disabled",
 )
 # Buttons
-begin_button = ttk.Button(content, text="Begin", command=begin_user_view_entry)
-enter_button = ttk.Button(content, text="Enter1", command=submit_text_entry)
-submit_name_button = ttk.Button(content, text="Enter2", command=submit_new_name)
-rename_button = ttk.Button(content, text="Rename", command=rename_show)
-next_button = ttk.Button(content, text="Next", command=next_show)
-exit_button = ttk.Button(content, text="Exit List", command=exit_list)
+begin_button = ttk.Button(content, text="Begin", command=begin_button_press)
+enter_views_button = ttk.Button(
+    content, text="Enter1", command=enter_views_button_press
+)
+enter_name_button = ttk.Button(content, text="Enter2", command=enter_name_button_press)
+rename_button = ttk.Button(content, text="Rename", command=rename_button_press)
+next_button = ttk.Button(content, text="Next", command=next_button_press)
+exit_button = ttk.Button(content, text="Exit List", command=exit_button_press)
 # Photos
 banana = PhotoImage(file="bananadance.gif")
 small_banana = banana.subsample(2)
@@ -438,8 +479,8 @@ output_text.grid(row=0, column=0, sticky=(N, S, W, E))
 entry_label.grid(column=3, row=0, columnspan=2, sticky=(N, W), padx=5)
 entry_field.grid(column=3, row=1, columnspan=2, sticky=(N, E, W), padx=5)
 begin_button.grid(column=3, row=2, padx=5, pady=3, sticky=(N))
-enter_button.grid(column=3, row=2, padx=5, pady=3)
-submit_name_button.grid(column=3, row=2, padx=5, pady=3)
+enter_views_button.grid(column=3, row=2, padx=5, pady=3)
+enter_name_button.grid(column=3, row=2, padx=5, pady=3)
 rename_button.grid(column=4, row=2, padx=5)
 next_button.grid(column=3, row=3, padx=5, pady=6)
 exit_button.grid(column=3, row=4, padx=5, pady=3)
