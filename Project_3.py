@@ -9,6 +9,7 @@ import csv
 imported_shows = list()
 current_show_index = 0
 show_list_len = int()
+banana_state = False
 
 # --------------------ORIGINAL CODE------------------------
 
@@ -221,6 +222,7 @@ def append_output_text(message: str) -> None:
     """
     set_output_write_enable()
     output_text.insert(END, message)
+    output_text.see(END)
     set_output_read_only()
 
 
@@ -234,7 +236,14 @@ def display_current_show():
         f"Episode: {show['Episode Name']}\n"
         f"Season: {show['Season']}, Episode: {show['Episode Number']}\n"
     )
+    if len(show) == 4:
+        show_output += f"Views: {str(show['Views'])}\n"
+    else:
+        show_output += "\n"
+    clear_output_text()
     append_output_text(show_output)
+    if banana_state:
+        bananacise()
 
 
 def clear_output_text() -> None:
@@ -299,8 +308,10 @@ def reset_viewer_buttons() -> None:
 
 def bananacise() -> None:
     """bananacise"""
+    # global banana_state
+    # banana_state = True
     insert_widget(banana_label)
-    append_output_text('\n"BANANA"\n')
+    append_output_text('"BANANA"\n')
 
 
 # --------------------IMPORT / EXPORT FUNCTIONS------------------------
@@ -350,10 +361,40 @@ def init_shows_viewer() -> None:
         init_viewer_buttons()
         # displays the current show to the output text
         display_current_show()
+    # If the file was empty, notify the user
     else:
         empty_file = "Imported file has no shows saved.\n"
         append_output_text(empty_file)
         print_welcome_message()
+
+
+def get_view_count() -> float:
+    """
+    Returns the number of views entered into
+    the text entry field. If invalid entry,
+    returns -1.
+    """
+    try:
+        view_cnt = entry_field.get()
+        # Verifies that the given input is a valid float
+        view_cnt = float(view_cnt)
+        if view_cnt < 0:
+            raise Exception
+    except:
+        # If not valid, user is prompted
+        append_output_text(f'Error - Invalid Entry "{view_cnt}"\n')
+        view_cnt = -1
+    return view_cnt
+
+
+def store_view_count(count: float) -> None:
+    """
+    Stores the given number of views 
+    to the current show. number of views
+    is stored with a dictionary key of
+    'Views'
+    """
+    imported_shows[current_show_index]["Views"] = count
 
 
 # --------------------BUTTON FUNCTIONS-------------------------------
@@ -361,7 +402,7 @@ def ___BUTTON___():
     pass
 
 
-def begin_button_press():
+def begin_button_press() -> None:
     """
     Begins the shows views sequence once
     the user selects a valid .csv file.
@@ -384,12 +425,23 @@ def begin_button_press():
         append_output_text(message)
 
 
-def enter_views_button_press():
-    # rename_button["state"] = "disabled"  # Test Code
-    pass
+def enter_views_button_press() -> None:
+    """
+    Gets the number of views entered by
+    the user in the entry field and stores
+    the value in the current show list index.
+    """
+    # Gets the view count form user
+    view_cnt = get_view_count()
+    # If the entered value is valid, store the
+    # value and display it to the output text box.
+    if view_cnt != -1:
+        store_view_count(view_cnt)
+        display_current_show()
+    clear_entry_field()
 
 
-def rename_button_press():
+def rename_button_press() -> None:
     """
     Begins the sequence to replace the
     name for the current show
@@ -411,6 +463,7 @@ def enter_name_button_press():
     """
     # Gets the new name from the entry field
     new_name = entry_field.get()
+    clear_entry_field()
     # Verifies that a new name was entered
     if len(new_name) > 0:
         # Resets the UI
@@ -421,13 +474,16 @@ def enter_name_button_press():
         # replaces the old name with the new name in
         # the output text box
         imported_shows[current_show_index]["Episode Name"] = new_name
-        init_shows_viewer()
-        # bananacise
-        bananacise()
+        # displays banana
+        global banana_state
+        banana_state = True
+        display_current_show()
 
 
 def next_button_press():
     # Test Code
+    global banana_state
+    banana_state = False
     rename_button["state"] = "normal"
     banana_label.grid_remove()
 
