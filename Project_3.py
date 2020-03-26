@@ -6,10 +6,12 @@ import csv
 
 
 # Global Variables
+import_file_path = Path()
 imported_shows = list()
 current_show_index = 0
 show_list_len = int()
 banana_state = False
+
 
 # --------------------ORIGINAL CODE------------------------
 
@@ -61,11 +63,20 @@ banana_state = False
 
 
 def average_views(views_list: list) -> int:
+    """
+    Returns the average views for the
+    shows that have been given view counts.
+
+    Modified the summing to be able to work
+    with the dictionary format.
+    """
     sum = float()
     show_count = 0
-    for show in views_list[1:]:
-        sum += show[-1]
-        show_count += 1
+    for show in views_list:
+        if len(show) == 4:
+            # sum += show[-1]
+            sum += show["Views"]
+            show_count += 1
     try:
         average = sum / show_count
     except:
@@ -73,43 +84,59 @@ def average_views(views_list: list) -> int:
     return round(average)
 
 
-def get_most_popular(views_list: list) -> list:
-    show_list = list()
+def get_most_popular(views_list: list) -> dict:
+    # show_list = list()
+    # max_num = 0.0
+    # for show in views_list[1:]:
+    #     if float(show[-1]) > max_num:
+    #         max_num = show[-1]
+    #         show_name = show[2]
+    #         show_list = [show_name, max_num]
+    # return show_list
+    most_viewed = dict()
     max_num = 0.0
-    # length = len(views_list)
-    for show in views_list[1:]:
-        # if int(show[-1]) > max_num:
-        if float(show[-1]) > max_num:
-            max_num = show[-1]
-            show_name = show[2]
-            show_list = [show_name, max_num]
-    return show_list
+    for show in views_list:
+        if len(show) == 4 and show["Views"] > max_num:
+            most_viewed = show
+            max_num = show["Views"]
+    return most_viewed
 
 
-def get_least_popular(views_list: list) -> list:
-    show_list = [views_list[1][2], views_list[1][-1]]
-    min_num = float(views_list[1][-1])
-    for show in views_list[2:]:
-        # if int(show[-1]) < min_num:
-        if float(show[-1]) < min_num:
-            min_num = show[-1]
-            show_name = show[2]
-            show_list = [show_name, min_num]
-    return show_list
+def get_least_popular(views_list: list) -> dict:
+    # show_list = [views_list[1][2], views_list[1][-1]]
+    # min_num = float(views_list[1][-1])
+    # for show in views_list[2:]:
+    #     if float(show[-1]) < min_num:
+    #         min_num = show[-1]
+    #         show_name = show[2]
+    #         show_list = [show_name, min_num]
+    # return show_list
+    least_viewed = dict()
+    show_index = 0
+    while show_index < len(views_list):
+        if len(views_list[show_index]) == 4:
+            least_viewed = views_list[show_index]
+            show_index += 1
+            break
+        show_index += 1
+    for show in views_list[show_index:]:
+        if len(show) == 4 and show["Views"] < least_viewed["Views"]:
+            least_viewed = show
+    return least_viewed
 
 
-def create_export_file(in_file: Path, views_list: list) -> Path:
-    file_extension = Path("_views.csv")
-    out_file = in_file.stem / file_extension
-    with open(out_file, "w") as new_file:
-        for line in views_list:
-            season_num = line[0]
-            episode_num = line[1]
-            name = line[2]
-            views = line[3]
-            new_string = f"{season_num},{episode_num},{name},{views}"
-            new_file.write(new_string)
-    return out_file
+# def create_export_file(in_file: Path, views_list: list) -> Path:
+#     file_extension = Path("_views.csv")
+#     out_file = in_file.stem / file_extension
+#     with open(out_file, "w") as new_file:
+#         for line in views_list:
+#             season_num = line[0]
+#             episode_num = line[1]
+#             name = line[2]
+#             views = line[3]
+#             new_string = f"{season_num},{episode_num},{name},{views}"
+#             new_file.write(new_string)
+#     return out_file
 
 
 def import_file(import_file: Path) -> list:
@@ -260,6 +287,37 @@ def clear_entry_field() -> None:
     entry_field.delete(0, "end")
 
 
+def print_views_results() -> None:
+    most_viewed = get_most_popular(imported_shows)
+    least_viewed = get_least_popular(imported_shows)
+    avg_views = average_views(imported_shows)
+
+    program_name = Path(__file__).name
+    name = "Tony Samaniego"
+
+    most_name = most_viewed["Episode Name"]
+    most_season = most_viewed["Season"]
+    most_episode = most_viewed["Episode Number"]
+    most_popular = f"{most_name} Season {most_season} / Episode {most_episode}"
+
+    least_name = least_viewed["Episode Name"]
+    least_season = least_viewed["Season"]
+    least_episode = least_viewed["Episode Number"]
+    least_popular = f"{least_name} Season {least_season} / Episode {least_episode}"
+
+    more_than = most_viewed["Views"] - avg_views
+    less_than = avg_views - least_viewed["Views"]
+
+    report_string = (
+        f"{program_name}\n"
+        f"------------------\n"
+        f"{name}\n"
+        "------------------\n"
+        f"The average number of views for all episodes so far is {avg_views} views. The most popular episode was {most_popular} with {more_than:.1f} more than average. The least popular episode was {least_popular} with {less_than:.1f} less than average"
+    )
+    append_output_text(report_string)
+
+
 # --------------------UI FUNCTIONS------------------------
 def ___UI___():
     pass
@@ -306,10 +364,18 @@ def reset_viewer_buttons() -> None:
     insert_widget(enter_views_button)
 
 
+def disable_views_buttons() -> None:
+    """
+    Disables all views buttons
+    """
+    disable_button(enter_views_button)
+    disable_button(rename_button)
+    disable_button(next_button)
+    disable_button(exit_button)
+
+
 def bananacise() -> None:
     """bananacise"""
-    # global banana_state
-    # banana_state = True
     insert_widget(banana_label)
     append_output_text('"BANANA"\n')
 
@@ -339,6 +405,31 @@ def import_csv_file(import_path: Path) -> None:
     global show_list_len
     imported_shows = import_file(import_path)
     show_list_len = len(imported_shows)
+
+
+def export_shows_list() -> None:
+    """
+    Exports the updated imported shows list
+    to the program file directory. The file 
+    name will have the same name as the file
+    imported with "_views" added to the file
+    name.
+    """
+    # builds the export file name
+    file_name = import_file_path.stem
+    file_tag = "_views"
+    file_type = import_file_path.suffix
+    export_file = file_name + file_tag + file_type
+    # creates the file and uploads the data to it in csv format
+    with open(export_file, "w", newline="") as out_file:
+        # Gets the header from the dictionary keys
+        keys = get_dictionary_keys()
+        writer = csv.DictWriter(out_file, fieldnames=keys)
+        # writes the file header
+        writer.writeheader()
+        # writes the data to the file
+        for item in imported_shows:
+            writer.writerow(item)
 
 
 # --------------------SEQUENCE FUNCTIONS-------------------------------
@@ -397,6 +488,27 @@ def store_view_count(count: float) -> None:
     imported_shows[current_show_index]["Views"] = count
 
 
+def get_dictionary_keys() -> list:
+    """
+    Returns a list of the keys for the
+    imported shows list. Checks the list
+    for the correct number of keys by 
+    cycles through and verifying that "Views"
+    should be included with the list of 
+    keys.
+    """
+    MAX_KEYS = 4
+    # Gets the default 3 set of keys
+    keys = imported_shows[0].keys()
+    for item in imported_shows:
+        # if an item in the list has 4 elements
+        if len(item) == MAX_KEYS:
+            # get a list of its keys an break
+            keys = item.keys()
+            break
+    return keys
+
+
 # --------------------BUTTON FUNCTIONS-------------------------------
 def ___BUTTON___():
     pass
@@ -414,8 +526,11 @@ def begin_button_press() -> None:
     upload_file = get_import_file()
     # Verifies that the file has a .csv suffix
     if upload_file.is_file() and upload_file.suffix == ".csv":
+        # Saves the file path as a global variable
+        global import_file_path
+        import_file_path = upload_file
         # imports the shows list
-        import_csv_file(upload_file)
+        import_csv_file(import_file_path)
         # initializes the GUI for entering shows viewings
         init_shows_viewer()
     # If the file was not a valid .csv file,
@@ -481,17 +596,27 @@ def enter_name_button_press():
 
 
 def next_button_press():
-    # Test Code
+    """
+    Increments to the next show in the 
+    shows list. 
+    """
     global banana_state
+    global current_show_index
     banana_state = False
-    rename_button["state"] = "normal"
-    banana_label.grid_remove()
+    current_show_index += 1
+    if current_show_index == show_list_len:
+        exit_button_press()
+    else:
+        init_viewer_buttons()
+        display_current_show()
 
 
 def exit_button_press():
-    # Test Code
-    for item in imported_shows:
-        print(item)
+    """ """
+    disable_views_buttons()
+    clear_output_text()
+    print_views_results()
+    export_shows_list()
 
 
 # Main Window
