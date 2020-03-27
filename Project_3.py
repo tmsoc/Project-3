@@ -284,7 +284,7 @@ def append_output_text(message: str) -> None:
     set_output_read_only()
 
 
-def display_current_show():
+def display_current_show() -> None:
     """
     Displays the current show to the
     output text box.
@@ -646,7 +646,7 @@ def rename_button_press() -> None:
     init_rename_buttons()
 
 
-def enter_name_button_press():
+def enter_name_button_press() -> None:
     """
     Stores the entered name to the show,
     resets the all the UI buttons to
@@ -671,7 +671,7 @@ def enter_name_button_press():
         display_current_show()
 
 
-def next_button_press():
+def next_button_press() -> None:
     """
     Increments to the next episode in the
     shows list.
@@ -690,7 +690,7 @@ def next_button_press():
         display_current_show()
 
 
-def exit_button_press():
+def exit_button_press() -> None:
     """
     Ends the views entry sequence and
     prints a result summary to the
